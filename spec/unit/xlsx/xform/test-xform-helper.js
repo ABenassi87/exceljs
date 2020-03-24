@@ -1,18 +1,15 @@
-'use strict';
+const {cloneDeep, each} = require('../../../utils/under-dash');
+const CompyXform = require('./compy-xform');
 
-const Sax = require('sax');
-const {expect} = require('chai');
-const _ = require('../../../utils/under-dash');
-
-const XmlStream = require('../../../../lib/utils/xml-stream');
-const CompositeXform = require('../../../../lib/xlsx/xform/composite-xform');
-const BooleanXform = require('../../../../lib/xlsx/xform/simple/boolean-xform');
+const SAXStream = verquire('utils/sax-stream');
+const XmlStream = verquire('utils/xml-stream');
+const BooleanXform = verquire('xlsx/xform/simple/boolean-xform');
 
 function getExpectation(expectation, name) {
   if (!expectation.hasOwnProperty(name)) {
     throw new Error(`Expectation missing required field: ${name}`);
   }
-  return _.cloneDeep(expectation[name]);
+  return cloneDeep(expectation[name]);
 }
 
 // ===============================================================================================================
@@ -31,7 +28,7 @@ const its = {
 
         const xform = expectation.create();
         xform.prepare(model, expectation.options);
-        expect(_.cloneDeep(model)).to.deep.equal(result);
+        expect(cloneDeep(model, false)).to.deep.equal(result);
         resolve();
       }));
   },
@@ -44,8 +41,9 @@ const its = {
 
         const xform = expectation.create();
         const xmlStream = new XmlStream();
-        xform.render(xmlStream, model);
+        xform.render(xmlStream, model, 0);
         // console.log(xmlStream.xml);
+        // console.log(result);
 
         expect(xmlStream.xml).xml.to.equal(result);
         resolve();
@@ -78,10 +76,12 @@ const its = {
           child: getExpectation(expectation, 'preparedModel'),
           post: true,
         };
-        const result =
-          `<compy><pre/>${getExpectation(expectation, 'xml')}<post/></compy>`;
+        const result = `<compy><pre/>${getExpectation(
+          expectation,
+          'xml'
+        )}<post/></compy>`;
 
-        const xform = new CompositeXform({
+        const xform = new CompyXform({
           tag: 'compy',
           children: [
             {
@@ -116,7 +116,7 @@ const its = {
         const result = {pre: true};
         result[childXform.tag] = getExpectation(expectation, 'parsedModel');
         result.post = true;
-        const xform = new CompositeXform({
+        const xform = new CompyXform({
           tag: 'compy',
           children: [
             {
@@ -130,16 +130,15 @@ const its = {
             },
           ],
         });
-        const parser = Sax.createStream(true);
-
+        const saxStream = new SAXStream();
         xform
-          .parse(parser)
+          .parse(saxStream)
           .then(model => {
             // console.log('parsed Model', JSON.stringify(model));
             // console.log('expected Model', JSON.stringify(result));
 
             // eliminate the undefined
-            const clone = _.cloneDeep(model, false);
+            const clone = cloneDeep(model, false);
 
             // console.log('result', JSON.stringify(clone));
             // console.log('expect', JSON.stringify(result));
@@ -147,7 +146,7 @@ const its = {
             resolve();
           })
           .catch(reject);
-        parser.write(xml);
+        saxStream.write(xml);
       }));
   },
 
@@ -157,14 +156,14 @@ const its = {
         const xml = getExpectation(expectation, 'xml');
         const result = getExpectation(expectation, 'parsedModel');
 
-        const parser = Sax.createStream(true);
+        const saxStream = new SAXStream();
         const xform = expectation.create();
 
         xform
-          .parse(parser)
+          .parse(saxStream)
           .then(model => {
             // eliminate the undefined
-            const clone = _.cloneDeep(model, false);
+            const clone = cloneDeep(model, false);
 
             // console.log('result', JSON.stringify(clone));
             // console.log('expect', JSON.stringify(result));
@@ -173,7 +172,7 @@ const its = {
           })
           .catch(reject);
 
-        parser.write(xml);
+        saxStream.write(xml);
       }));
   },
 
@@ -187,7 +186,7 @@ const its = {
         xform.reconcile(model, expectation.options);
 
         // eliminate the undefined
-        const clone = _.cloneDeep(model, false);
+        const clone = cloneDeep(model, false);
 
         expect(clone).to.deep.equal(result);
         resolve();
@@ -196,10 +195,10 @@ const its = {
 };
 
 function testXform(expectations) {
-  _.each(expectations, expectation => {
+  each(expectations, expectation => {
     const tests = getExpectation(expectation, 'tests');
     describe(expectation.title, () => {
-      _.each(tests, test => {
+      each(tests, test => {
         its[test](expectation);
       });
     });

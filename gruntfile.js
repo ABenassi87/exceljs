@@ -3,7 +3,7 @@
 module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-babel');
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-terser');
   grunt.loadNpmTasks('grunt-contrib-jasmine');
   grunt.loadNpmTasks('grunt-contrib-copy');
 
@@ -23,6 +23,15 @@ module.exports = function(grunt) {
       },
     },
     browserify: {
+      bare: {
+        src: ['./build/lib/exceljs.bare.js'],
+        dest: './dist/exceljs.bare.js',
+        options: {
+          browserifyOptions: {
+            standalone: 'ExcelJS',
+          },
+        },
+      },
       bundle: {
         src: ['./build/lib/exceljs.browser.js'],
         dest: './dist/exceljs.js',
@@ -37,13 +46,16 @@ module.exports = function(grunt) {
         dest: './build/web/exceljs.spec.js',
       },
     },
-    uglify: {
+    terser: {
       options: {
-        banner: '/*! ExcelJS <%= grunt.template.today("dd-mm-yyyy") %> */\n',
+        output: {
+          preamble: '/*! ExcelJS <%= grunt.template.today("dd-mm-yyyy") %> */\n',
+        },
       },
       dist: {
         files: {
           './dist/exceljs.min.js': ['./dist/exceljs.js'],
+          './dist/exceljs.bare.min.js': ['./dist/exceljs.bare.js'],
         },
       },
       // es3: {
@@ -65,9 +77,9 @@ module.exports = function(grunt) {
     copy: {
       dist: {
         files: [
-          { expand: true, src: ['**'], cwd: './build/lib', dest: './dist/es5' },
-          { src: './build/lib/exceljs.nodejs.js', dest: './dist/es5/index.js' },
-          { src: './LICENSE', dest: './dist/LICENSE' },
+          {expand: true, src: ['**'], cwd: './build/lib', dest: './dist/es5'},
+          {src: './build/lib/exceljs.nodejs.js', dest: './dist/es5/index.js'},
+          {src: './LICENSE', dest: './dist/LICENSE'},
         ],
       },
     },
@@ -82,6 +94,6 @@ module.exports = function(grunt) {
     },
   });
 
-  grunt.registerTask('build', ['babel', 'browserify', 'uglify', 'copy']);
-  grunt.registerTask('ug', ['uglify']);
+  grunt.registerTask('build', ['babel', 'browserify', 'terser', 'copy']);
+  grunt.registerTask('ug', ['terser']);
 };

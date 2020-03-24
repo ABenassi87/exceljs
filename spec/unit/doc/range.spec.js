@@ -1,7 +1,4 @@
-'use strict';
-
-const { expect } = require('chai');
-const Range = require('../../../lib/doc/range');
+const Range = verquire('doc/range');
 
 describe('Range', () => {
   function check(

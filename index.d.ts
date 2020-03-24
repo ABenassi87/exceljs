@@ -1,6 +1,4 @@
 declare interface Buffer extends ArrayBuffer { }
-declare interface Stream { }
-declare interface Writable { }
 
 export const enum RelationshipType {
 	None = 0,
@@ -283,15 +281,21 @@ export interface Alignment {
 	horizontal: 'left' | 'center' | 'right' | 'fill' | 'justify' | 'centerContinuous' | 'distributed';
 	vertical: 'top' | 'middle' | 'bottom' | 'distributed' | 'justify';
 	wrapText: boolean;
+	shrinkToFit: boolean;
 	indent: number;
 	readingOrder: 'rtl' | 'ltr';
 	textRotation: number | 'vertical';
+}
+
+export interface Protection {
+	locked: boolean;
 }
 
 export interface Style {
 	numFmt: string;
 	font: Partial<Font>;
 	alignment: Partial<Alignment>;
+	protection: Partial<Protection>;
 	border: Partial<Borders>;
 	fill: Fill;
 }
@@ -382,7 +386,7 @@ export interface CellModel {
 	text?: string;
 	hyperlink?: string;
 	value?: CellValue;
-	master: Cell;
+	master: string;
 	formula?: string;
 	sharedFormula?: string;
 	result?: string | number | any;
@@ -401,7 +405,7 @@ export interface Cell extends Style, Address {
 	readonly text: string;
 	readonly fullAddress: {
 		sheetName: string;
-		address: Address;
+		address: string;
 		row: Row;
 		col: Column;
 	};
@@ -430,7 +434,7 @@ export interface Cell extends Style, Address {
 	/**
 	 * comment of the cell
 	 */
-	comment: Comment;
+	note: Comment;
 
 	/**
 	 * convenience getter to access the formula
@@ -470,7 +474,7 @@ export interface Cell extends Style, Address {
 	release(): void;
 	addMergeRef(): void;
 	releaseMergeRef(): void;
-	merge(master: Cell): void;
+	merge(master: Cell, ignoreStyle?: boolean): void;
 	unmerge(): void;
 	isMergedTo(master: Cell): boolean;
 	toString(): string;
@@ -603,9 +607,27 @@ export interface Column {
 	 * The cell values in the column
 	 */
 	values: ReadonlyArray<CellValue>;
-}
 
-export interface ColumnExtension extends Partial<Style> {
+	/**
+	 * Column letter key
+	 */
+	readonly letter: string;
+	readonly number: number;
+	readonly worksheet: Worksheet;
+	readonly isCustomWidth: boolean;
+	readonly headers: string[];
+	readonly isDefault: boolean;
+	readonly headerCount: number;
+	border: Partial<Borders>;
+	fill: Fill;
+	numFmt: string
+	font: Partial<Font>;
+	alignment: Partial<Alignment>;
+	protection: Partial<Protection>;
+
+	toString(): string
+	equivalentTo(other: Column): boolean
+
 	/**
 	 * indicate the collapsed state based on outlineLevel
 	 */
@@ -620,8 +642,9 @@ export interface ColumnExtension extends Partial<Style> {
 	 * Iterate over all current cells in this column including empty cells
 	 */
 	eachCell(opt: { includeEmpty: boolean }, callback: (cell: Cell, rowNumber: number) => void): void;
-}
 
+	defn: any; //todo
+}
 export interface PageSetup {
 	/**
 	 * Whitespace on the borders of the page. Units are inches.
@@ -811,6 +834,24 @@ export type AutoFilter = string | {
 	to: string | { row: number; column: number };
 };
 
+export interface WorksheetProtection {
+	objects: boolean;
+	scenarios: boolean;
+	selectLockedCells: boolean;
+	selectUnlockedCells: boolean;
+	formatCells: boolean;
+	formatColumns: boolean;
+	formatRows: boolean;
+	insertColumns: boolean;
+	insertRows: boolean;
+	insertHyperlinks: boolean;
+	deleteColumns: boolean;
+	deleteRows: boolean;
+	sort: boolean;
+	autoFilter: boolean;
+	pivotTables: boolean;
+}
+
 export interface Image {
 	extension: 'jpeg' | 'png' | 'gif';
 	base64?: string;
@@ -847,6 +888,11 @@ export interface ImageRange {
 export interface ImagePosition {
 	tl: { col: number; row: number };
 	ext: { width: number; height: number };
+}
+
+export interface ImageHyperlinkValue {
+	hyperlink: string;
+	tooltip?: string;
 }
 
 export interface Range extends Location {
@@ -982,7 +1028,7 @@ export interface Worksheet {
 	/**
 	 * Access an individual columns by key, letter and 1-based column number
 	 */
-	getColumn(indexOrKey: number | string): Partial<Column> & ColumnExtension;
+	getColumn(indexOrKey: number | string): Partial<Column>;
 
 	/**
 	 * Cut one or more columns (columns to the right are shifted left)
@@ -1085,6 +1131,16 @@ export interface Worksheet {
 	mergeCells(v: [string, string, string]): void;
 	mergeCells(v: [number, number, number, number]): void;
 	mergeCells(v: [number, number, number, number, string]): void;
+	mergeCellsWithoutStyle(): void;
+	mergeCellsWithoutStyle(v: Range): void;
+	mergeCellsWithoutStyle(v: string): void;
+	mergeCellsWithoutStyle(v: Location): void;
+	mergeCellsWithoutStyle(top: number, left: number, bottom: number, right: number, sheetName?: string): void;
+	mergeCellsWithoutStyle(tl: string, br: string, sheetName?: string): void;
+	mergeCellsWithoutStyle(v: [string, string]): void;
+	mergeCellsWithoutStyle(v: [string, string, string]): void;
+	mergeCellsWithoutStyle(v: [number, number, number, number]): void;
+	mergeCellsWithoutStyle(v: [number, number, number, number, string]): void;
 
 	/**
 	 * unmerging the cells breaks the style links
@@ -1113,7 +1169,7 @@ export interface Worksheet {
 	 * Using the image id from `Workbook.addImage`,
 	 * embed an image within the worksheet to cover a range
 	 */
-	addImage(imageId: number, range: string | { editAs?: string; } & ImageRange | { editAs?: string; } & ImagePosition): void;
+	addImage(imageId: number, range: string | { editAs?: string; } & ImageRange & {hyperlinks?: ImageHyperlinkValue} | { editAs?: string; } & ImagePosition & {hyperlinks?: ImageHyperlinkValue}): void;
 
 	getImages(): Array<{
 		type: 'image',
@@ -1124,6 +1180,28 @@ export interface Worksheet {
 	commit(): void;
 
 	model: WorksheetModel;
+
+	/**
+	 * Worksheet protection
+	 */
+	protect(password: string, options: Partial<WorksheetProtection>): Promise<void>;
+	unprotect(): void;
+
+	/**
+	 * Add a new table and return a reference to it
+	 */
+	addTable(tableProperties: TableProperties): Table;
+	/**
+	 * fetch table by name or id
+	 */
+	getTable(name: string): Table;
+}
+
+export interface CalculationProperties {
+	/**
+	 * Whether the application shall perform a full recalculation when the workbook is opened
+	 */
+	fullCalcOnLoad: boolean
 }
 
 export interface WorksheetProperties {
@@ -1146,6 +1224,11 @@ export interface WorksheetProperties {
 	 * Default row height (default: 15)
 	 */
 	defaultRowHeight: number;
+
+	/**
+	 * Default column width (optional)
+	 */
+	defaultColWidth?: number;
 
 	/**
 	 * default: 55
@@ -1198,7 +1281,7 @@ export interface Xlsx {
 	 * read from a stream
 	 * @param stream
 	 */
-	read(stream: Stream): Promise<Workbook>;
+	read(stream: import('stream').Stream): Promise<Workbook>;
 
 	/**
 	 * load from an array buffer
@@ -1209,7 +1292,7 @@ export interface Xlsx {
 	/**
 	 * Create input stream for reading
 	 */
-	createInputStream(): Writable;
+	createInputStream(): import('events').EventEmitter;
 
 	/**
 	 * write to a buffer
@@ -1224,17 +1307,62 @@ export interface Xlsx {
 	/**
 	 * write to a stream
 	 */
-	write(stream: Stream, options?: Partial<XlsxWriteOptions>): Promise<void>;
+	write(stream: import('stream').Stream, options?: Partial<XlsxWriteOptions>): Promise<void>;
+}
+
+// https://c2fo.io/fast-csv/docs/parsing/options
+export interface FastCsvParserOptionsArgs {
+	objectMode: boolean;
+	delimiter: string;
+	quote: string | null;
+	escape: string;
+	headers: boolean | HeaderTransformFunction | HeaderArray;
+	renameHeaders: boolean;
+	ignoreEmpty: boolean;
+	comment: string;
+	strictColumnHandling: boolean;
+	discardUnmappedColumns: boolean;
+	trim: boolean;
+	ltrim: boolean;
+	rtrim: boolean;
+	encoding: string;
+	maxRows: number;
+	skipLines: number;
+	skipRows: number;
+}
+
+// https://c2fo.io/fast-csv/docs/formatting/options/
+export interface FastCsvFormatterOptionsArgs {
+	objectMode: boolean;
+	delimiter: string;
+	rowDelimiter: string;
+	quote: string | boolean;
+	escape: string;
+	quoteColumns: QuoteColumns;
+	quoteHeaders: QuoteColumns;
+	headers: null | boolean | string[];
+	includeEndRowDelimiter: boolean;
+	writeBOM: boolean;
+	transform: RowTransformFunction;
+	alwaysWriteHeaders: boolean;
 }
 
 export interface CsvReadOptions {
 	dateFormats: string[];
 	map(value: any, index: number): any;
+	sheetName: string;
+	parserOptions: Partial<FastCsvParserOptionsArgs>;
 }
 
 export interface CsvWriteOptions {
 	dateFormat: string;
 	dateUTC: boolean;
+	sheetName: string;
+	sheetId: number;
+	encoding: string;
+	map(value: any, index: number): any;
+	includeEmptyRows: boolean;
+	formatterOptions: Partial<FastCsvFormatterOptionsArgs>;
 }
 
 export interface Csv {
@@ -1246,17 +1374,17 @@ export interface Csv {
 	/**
 	 * read from a stream
 	 */
-	read(stream: Stream, options?: Partial<CsvReadOptions>): Promise<Worksheet>;
+	read(stream: import('stream').Stream, options?: Partial<CsvReadOptions>): Promise<Worksheet>;
 
 	/**
 	 * Create input stream for reading
 	 */
-	createInputStream(): Writable;
+	createInputStream(options?: Partial<CsvReadOptions>): import('events').EventEmitter;
 
 	/**
 	 * write to a buffer
 	 */
-	writeBuffer(): Promise<Buffer>;
+	writeBuffer(options?: Partial<CsvWriteOptions>): Promise<Buffer>;
 
 	/**
 	 * write to a file
@@ -1266,7 +1394,7 @@ export interface Csv {
 	/**
 	 * write to a stream
 	 */
-	write(stream: Stream, options?: Partial<CsvWriteOptions>): Promise<void>;
+	write(stream: import('stream').Stream, options?: Partial<CsvWriteOptions>): Promise<void>;
 }
 
 export interface Media {
@@ -1370,6 +1498,11 @@ export class Workbook {
 	properties: WorkbookProperties;
 
 	/**
+	 * Workbook calculation Properties
+	 */
+	calcProperties: CalculationProperties;
+
+	/**
 	 * xlsx file format operations
 	 */
 	readonly xlsx: Xlsx;
@@ -1425,6 +1558,129 @@ export class Workbook {
 	getImage(id: number): Image;
 }
 
+export interface TableStyleProperties {
+	/**
+	 * The colour theme of the table
+	 * @default 'TableStyleMedium2'
+	 */
+	theme?: 'TableStyleDark1' | 'TableStyleDark10' | 'TableStyleDark11' | 'TableStyleDark2' | 'TableStyleDark3' | 'TableStyleDark4' | 'TableStyleDark5' | 'TableStyleDark6' | 'TableStyleDark7' | 'TableStyleDark8' | 'TableStyleDark9' | 'TableStyleLight1' | 'TableStyleLight10' | 'TableStyleLight11' | 'TableStyleLight12' | 'TableStyleLight13' | 'TableStyleLight14' | 'TableStyleLight15' | 'TableStyleLight16' | 'TableStyleLight17' | 'TableStyleLight18' | 'TableStyleLight19' | 'TableStyleLight2' | 'TableStyleLight20' | 'TableStyleLight21' | 'TableStyleLight3' | 'TableStyleLight4' | 'TableStyleLight5' | 'TableStyleLight6' | 'TableStyleLight7' | 'TableStyleLight8' | 'TableStyleLight9' | 'TableStyleMedium1' | 'TableStyleMedium10' | 'TableStyleMedium11' | 'TableStyleMedium12' | 'TableStyleMedium13' | 'TableStyleMedium14' | 'TableStyleMedium15' | 'TableStyleMedium16' | 'TableStyleMedium17' | 'TableStyleMedium18' | 'TableStyleMedium19' | 'TableStyleMedium2' | 'TableStyleMedium20' | 'TableStyleMedium21' | 'TableStyleMedium22' | 'TableStyleMedium23' | 'TableStyleMedium24' | 'TableStyleMedium25' | 'TableStyleMedium26' | 'TableStyleMedium27' | 'TableStyleMedium28' | 'TableStyleMedium3' | 'TableStyleMedium4' | 'TableStyleMedium5' | 'TableStyleMedium6' | 'TableStyleMedium7' | 'TableStyleMedium8' | 'TableStyleMedium9';
+	/**
+	  * Highlight the first column (bold)
+	  * @default false
+	  */
+	showFirstColumn?: boolean;
+	/**
+	  * Highlight the last column (bold)
+	  * @default false
+	  */
+	showLastColumn?: boolean;
+	/**
+	  * Alternate rows shown with background colour
+	  * @default false
+	  */
+	showRowStripes?: boolean;
+	/**
+	  * Alternate rows shown with background colour
+	  * @default false
+	  */
+	showColumnStripes?: boolean;
+}
+
+export interface TableColumnProperties {
+	/**
+	  * The name of the column, also used in the header
+	  */
+	name: string;
+	/**
+	  * Switches the filter control in the header
+	  * @default false
+	  */
+	filterButton?: boolean;
+	/**
+	  * Label to describe the totals row (first column)
+	  * @default 'Total'
+	  */
+	totalsRowLabel?: string;
+	/**
+	  * Name of the totals function
+	  * @default 'none'
+	  */
+	totalsRowFunction?: 'none' | 'average' | 'countNums' | 'count' | 'max' | 'min' | 'stdDev' | 'var' | 'sum' | 'custom';
+	/**
+	  * Optional formula for custom functions
+	  */
+	totalsRowFormula?: string;
+}
+
+
+export interface TableProperties {
+	/**
+	 * The name of the table
+	 */
+	name: string;
+	/**
+	 * The display name of the table
+	 */
+	displayName?: string;
+	/**
+	 * Top left cell of the table
+	 */
+	ref: string;
+	/**
+	 * Show headers at top of table
+	 * @default true
+	 */
+	headerRow?: boolean;
+	/**
+	 * Show totals at bottom of table
+	 * @default false
+	 */
+	totalsRow?: boolean;
+	/**
+	 * Extra style properties
+	 * @default {}
+	 */
+	style?: TableStyleProperties;
+	/**
+	 * Column definitions
+	 */
+	columns: TableColumnProperties[]
+	/**
+	 * Rows of data
+	 */
+	rows: any[][]
+}
+
+export type TableColumn = Required<TableColumnProperties>
+
+export interface Table extends Required<TableProperties> {
+	/**
+	 * Commit changes
+	 */
+	commit: () => void
+	/**
+	 * Remove a rows of data
+	 */
+	removeRows: (rowIndex: number, count: number) => void
+	/**
+	 * Add a row of data, either insert at rowNumber or append
+	 */
+	addRow: (values: any[], rowNumber: number) => void
+	/**
+	 * Get column
+	 */
+	getColumn: (colIndex: number) => TableColumn
+	/**
+	 * Add a new column, including column defn and values
+	 * inserts at colNumber or adds to the right
+	 */
+	addColumn: (column: TableColumnProperties, values: any[], colIndex: number) => void
+	/**
+	 * Remove a column with data
+	 */
+	removeColumns: (colIndex: number, count: number) => void
+}
+
 export namespace config {
 	function setValue(key: 'promise', promise: any): void;
 }
@@ -1435,7 +1691,7 @@ export namespace stream {
 			/**
 			 * Specifies a writable stream to write the XLSX workbook to.
 			 */
-			stream: Stream;
+			stream: import('stream').Stream;
 
 			/**
 			 * 	If stream not specified, this field specifies the path to a file to write the XLSX workbook to.

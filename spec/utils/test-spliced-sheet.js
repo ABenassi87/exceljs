@@ -1,8 +1,3 @@
-'use strict';
-
-const { expect } = require('chai');
-const verquire = require('./verquire');
-
 const Enums = verquire('doc/enums');
 
 module.exports = {
@@ -147,13 +142,13 @@ module.exports = {
         ws.getCell('B2').fill = {
           type: 'pattern',
           pattern: 'darkVertical',
-          fgColor: { argb: 'FFFF0000' },
+          fgColor: {argb: 'FFFF0000'},
         };
         ws.getRow(3).border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'},
         };
         ws.getRow(4).alignment = {
           horizontal: 'left',
@@ -203,7 +198,7 @@ module.exports = {
         ws.getCell('A2').fill = {
           type: 'pattern',
           pattern: 'darkVertical',
-          fgColor: { argb: 'FFFF0000' },
+          fgColor: {argb: 'FFFF0000'},
         };
         ws.getRow(2).alignment = {
           horizontal: 'left',
@@ -212,10 +207,10 @@ module.exports = {
 
         ws.spliceRows(2, 0, ['one', 'two', 'three']);
         ws.getCell('A2').border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'},
         };
       },
 
@@ -232,10 +227,10 @@ module.exports = {
           vertical: 'middle',
         });
         expect(ws.getCell('A2').style.border).to.deep.equal({
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'},
         });
         expect(ws.getCell('A3').style.alignment).to.deep.equal({
           horizontal: 'left',
@@ -244,7 +239,7 @@ module.exports = {
         expect(ws.getCell('A3').style.fill).to.deep.equal({
           type: 'pattern',
           pattern: 'darkVertical',
-          fgColor: { argb: 'FFFF0000' },
+          fgColor: {argb: 'FFFF0000'},
         });
       },
     },
@@ -334,9 +329,7 @@ module.exports = {
     },
     removeDefinedNames: {
       addSheet(wb) {
-        const wsSquare = wb.addWorksheet(
-          'splice-row-remove-name-square'
-        );
+        const wsSquare = wb.addWorksheet('splice-row-remove-name-square');
         wsSquare.addRow(['1,1', '1,2', '1,3', '1,4']);
         wsSquare.addRow(['2,1', '2,2', '2,3', '2,4']);
         wsSquare.addRow(['3,1', '3,2', '3,3', '3,4']);
@@ -350,9 +343,7 @@ module.exports = {
 
         wsSquare.spliceRows(2, 2);
 
-        const wsSingles = wb.addWorksheet(
-          'splice-row-remove-name-singles'
-        );
+        const wsSingles = wb.addWorksheet('splice-row-remove-name-singles');
         wsSingles.getCell('A1').value = '1,1';
         wsSingles.getCell('A4').value = '4,1';
         wsSingles.getCell('D1').value = '1,4';
@@ -368,9 +359,7 @@ module.exports = {
       },
 
       checkSheet(wb) {
-        const wsSquare = wb.getWorksheet(
-          'splice-row-remove-name-square'
-        );
+        const wsSquare = wb.getWorksheet('splice-row-remove-name-square');
         expect(wsSquare).to.not.be.undefined();
 
         expect(wsSquare.getRow(1).values).to.deep.equal([
@@ -398,9 +387,7 @@ module.exports = {
           });
         });
 
-        const wsSingles = wb.getWorksheet(
-          'splice-row-remove-name-singles'
-        );
+        const wsSingles = wb.getWorksheet('splice-row-remove-name-singles');
         expect(wsSingles).to.not.be.undefined();
 
         expect(wsSingles.getRow(1).values).to.deep.equal([, '1,1', , , '1,4']);
@@ -414,9 +401,7 @@ module.exports = {
     },
     insertDefinedNames: {
       addSheet(wb) {
-        const wsSquare = wb.addWorksheet(
-          'splice-row-insert-name-square'
-        );
+        const wsSquare = wb.addWorksheet('splice-row-insert-name-square');
         wsSquare.addRow(['1,1', '1,2', '1,3', '1,4']);
         wsSquare.addRow(['2,1', '2,2', '2,3', '2,4']);
         wsSquare.addRow(['3,1', '3,2', '3,3', '3,4']);
@@ -430,9 +415,7 @@ module.exports = {
 
         wsSquare.spliceRows(3, 0, ['foo', 'bar', 'baz', 'qux']);
 
-        const wsSingles = wb.addWorksheet(
-          'splice-row-insert-name-singles'
-        );
+        const wsSingles = wb.addWorksheet('splice-row-insert-name-singles');
         wsSingles.getCell('A1').value = '1,1';
         wsSingles.getCell('A4').value = '4,1';
         wsSingles.getCell('D1').value = '1,4';
@@ -448,9 +431,7 @@ module.exports = {
       },
 
       checkSheet(wb) {
-        const wsSquare = wb.getWorksheet(
-          'splice-row-insert-name-square'
-        );
+        const wsSquare = wb.getWorksheet('splice-row-insert-name-square');
         expect(wsSquare).to.not.be.undefined();
 
         expect(wsSquare.getRow(1).values).to.deep.equal([
@@ -499,9 +480,7 @@ module.exports = {
           });
         });
 
-        const wsSingles = wb.getWorksheet(
-          'splice-row-insert-name-singles'
-        );
+        const wsSingles = wb.getWorksheet('splice-row-insert-name-singles');
         expect(wsSingles).to.not.be.undefined();
         expect(wsSingles.getRow(1).values).to.deep.equal([, '1,1', , , '1,4']);
         expect(wsSingles.getRow(3).values).to.deep.equal([
@@ -521,9 +500,7 @@ module.exports = {
     },
     replaceDefinedNames: {
       addSheet(wb) {
-        const wsSquare = wb.addWorksheet(
-          'splice-row-replace-name-square'
-        );
+        const wsSquare = wb.addWorksheet('splice-row-replace-name-square');
         wsSquare.addRow(['1,1', '1,2', '1,3', '1,4']);
         wsSquare.addRow(['2,1', '2,2', '2,3', '2,4']);
         wsSquare.addRow(['3,1', '3,2', '3,3', '3,4']);
@@ -537,9 +514,7 @@ module.exports = {
 
         wsSquare.spliceRows(2, 1, ['foo', 'bar', 'baz', 'qux']);
 
-        const wsSingles = wb.addWorksheet(
-          'splice-row-replace-name-singles'
-        );
+        const wsSingles = wb.addWorksheet('splice-row-replace-name-singles');
         wsSingles.getCell('A1').value = '1,1';
         wsSingles.getCell('A4').value = '4,1';
         wsSingles.getCell('D1').value = '1,4';
@@ -555,9 +530,7 @@ module.exports = {
       },
 
       checkSheet(wb) {
-        const wsSquare = wb.getWorksheet(
-          'splice-row-replace-name-square'
-        );
+        const wsSquare = wb.getWorksheet('splice-row-replace-name-square');
         expect(wsSquare).to.not.be.undefined();
 
         expect(wsSquare.getRow(1).values).to.deep.equal([
@@ -599,9 +572,7 @@ module.exports = {
           });
         });
 
-        const wsSingles = wb.getWorksheet(
-          'splice-row-replace-name-singles'
-        );
+        const wsSingles = wb.getWorksheet('splice-row-replace-name-singles');
         expect(wsSingles).to.not.be.undefined();
 
         expect(wsSingles.getRow(1).values).to.deep.equal([, '1,1', , , '1,4']);
@@ -627,14 +598,14 @@ module.exports = {
         const ws = wb.addWorksheet('splice-column-remove-only');
 
         ws.columns = [
-          { key: 'id', width: 10 },
-          { key: 'name', width: 32 },
-          { key: 'dob', width: 10 },
+          {key: 'id', width: 10},
+          {key: 'name', width: 32},
+          {key: 'dob', width: 10},
         ];
 
-        ws.addRow({ id: 'id1', name: 'name1', dob: 'dob1' });
-        ws.addRow({ id: 2, dob: 'dob2' });
-        ws.addRow({ name: 'name3', dob: 3 });
+        ws.addRow({id: 'id1', name: 'name1', dob: 'dob1'});
+        ws.addRow({id: 2, dob: 'dob2'});
+        ws.addRow({name: 'name3', dob: 3});
 
         ws.spliceColumns(2, 1);
       },
@@ -843,13 +814,13 @@ module.exports = {
         ws.getCell('B2').fill = {
           type: 'pattern',
           pattern: 'darkVertical',
-          fgColor: { argb: 'FFFF0000' },
+          fgColor: {argb: 'FFFF0000'},
         };
         ws.getColumn(3).border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'},
         };
         ws.getColumn(4).alignment = {
           horizontal: 'left',
@@ -896,7 +867,7 @@ module.exports = {
         ws.getCell('B2').fill = {
           type: 'pattern',
           pattern: 'darkVertical',
-          fgColor: { argb: 'FFFF0000' },
+          fgColor: {argb: 'FFFF0000'},
         };
         ws.getColumn(2).alignment = {
           horizontal: 'left',
@@ -905,10 +876,10 @@ module.exports = {
 
         ws.spliceColumns(2, 0, ['one', 'two', 'three']);
         ws.getCell('B2').border = {
-          top: { style: 'thin' },
-          left: { style: 'thin' },
-          bottom: { style: 'thin' },
-          right: { style: 'thin' },
+          top: {style: 'thin'},
+          left: {style: 'thin'},
+          bottom: {style: 'thin'},
+          right: {style: 'thin'},
         };
       },
 
@@ -946,10 +917,10 @@ module.exports = {
         });
         expect(ws.getCell('B2').style).to.deep.equal({
           border: {
-            top: { style: 'thin' },
-            left: { style: 'thin' },
-            bottom: { style: 'thin' },
-            right: { style: 'thin' },
+            top: {style: 'thin'},
+            left: {style: 'thin'},
+            bottom: {style: 'thin'},
+            right: {style: 'thin'},
           },
         });
         expect(ws.getCell('C2').style).to.deep.equal({
@@ -960,7 +931,7 @@ module.exports = {
           fill: {
             type: 'pattern',
             pattern: 'darkVertical',
-            fgColor: { argb: 'FFFF0000' },
+            fgColor: {argb: 'FFFF0000'},
           },
         });
       },
@@ -1051,9 +1022,7 @@ module.exports = {
     },
     removeDefinedNames: {
       addSheet(wb) {
-        const wsSquare = wb.addWorksheet(
-          'splice-col-remove-name-square'
-        );
+        const wsSquare = wb.addWorksheet('splice-col-remove-name-square');
         wsSquare.addRow(['1,1', '1,2', '1,3', '1,4']);
         wsSquare.addRow(['2,1', '2,2', '2,3', '2,4']);
         wsSquare.addRow(['3,1', '3,2', '3,3', '3,4']);
@@ -1067,9 +1036,7 @@ module.exports = {
 
         wsSquare.spliceColumns(2, 2);
 
-        const wsSingles = wb.addWorksheet(
-          'splice-col-remove-name-singles'
-        );
+        const wsSingles = wb.addWorksheet('splice-col-remove-name-singles');
         wsSingles.getCell('A1').value = '1,1';
         wsSingles.getCell('A4').value = '4,1';
         wsSingles.getCell('D1').value = '1,4';
@@ -1085,9 +1052,7 @@ module.exports = {
       },
 
       checkSheet(wb) {
-        const wsSquare = wb.getWorksheet(
-          'splice-col-remove-name-square'
-        );
+        const wsSquare = wb.getWorksheet('splice-col-remove-name-square');
         expect(wsSquare).to.not.be.undefined();
 
         expect(wsSquare.getRow(1).values).to.deep.equal([, '1,1', '1,4']);
@@ -1105,9 +1070,7 @@ module.exports = {
           });
         });
 
-        const wsSingles = wb.getWorksheet(
-          'splice-col-remove-name-singles'
-        );
+        const wsSingles = wb.getWorksheet('splice-col-remove-name-singles');
         expect(wsSingles).to.not.be.undefined();
 
         expect(wsSingles.getRow(1).values).to.deep.equal([, '1,1', '1,4']);
@@ -1121,9 +1084,7 @@ module.exports = {
     },
     insertDefinedNames: {
       addSheet(wb) {
-        const wsSquare = wb.addWorksheet(
-          'splice-col-insert-name-square'
-        );
+        const wsSquare = wb.addWorksheet('splice-col-insert-name-square');
         wsSquare.addRow(['1,1', '1,2', '1,3', '1,4']);
         wsSquare.addRow(['2,1', '2,2', '2,3', '2,4']);
         wsSquare.addRow(['3,1', '3,2', '3,3', '3,4']);
@@ -1137,9 +1098,7 @@ module.exports = {
 
         wsSquare.spliceColumns(3, 0, ['foo', 'bar', 'baz', 'qux']);
 
-        const wsSingles = wb.addWorksheet(
-          'splice-col-insert-name-singles'
-        );
+        const wsSingles = wb.addWorksheet('splice-col-insert-name-singles');
         wsSingles.getCell('A1').value = '1,1';
         wsSingles.getCell('A4').value = '4,1';
         wsSingles.getCell('D1').value = '1,4';
@@ -1155,9 +1114,7 @@ module.exports = {
       },
 
       checkSheet(wb) {
-        const wsSquare = wb.getWorksheet(
-          'splice-col-insert-name-square'
-        );
+        const wsSquare = wb.getWorksheet('splice-col-insert-name-square');
         expect(wsSquare).to.not.be.undefined();
 
         expect(wsSquare.getRow(1).values).to.deep.equal([
@@ -1203,9 +1160,7 @@ module.exports = {
           });
         });
 
-        const wsSingles = wb.getWorksheet(
-          'splice-col-insert-name-singles'
-        );
+        const wsSingles = wb.getWorksheet('splice-col-insert-name-singles');
         expect(wsSingles).to.not.be.undefined();
 
         expect(wsSingles.getRow(1).values).to.deep.equal([
@@ -1233,9 +1188,7 @@ module.exports = {
     },
     replaceDefinedNames: {
       addSheet(wb) {
-        const wsSquare = wb.addWorksheet(
-          'splice-col-replace-name-square'
-        );
+        const wsSquare = wb.addWorksheet('splice-col-replace-name-square');
         wsSquare.addRow(['1,1', '1,2', '1,3', '1,4']);
         wsSquare.addRow(['2,1', '2,2', '2,3', '2,4']);
         wsSquare.addRow(['3,1', '3,2', '3,3', '3,4']);
@@ -1249,9 +1202,7 @@ module.exports = {
 
         wsSquare.spliceColumns(2, 1, ['foo', 'bar', 'baz', 'qux']);
 
-        const wsSingles = wb.addWorksheet(
-          'splice-col-replace-name-singles'
-        );
+        const wsSingles = wb.addWorksheet('splice-col-replace-name-singles');
         wsSingles.getCell('A1').value = '1,1';
         wsSingles.getCell('A4').value = '4,1';
         wsSingles.getCell('D1').value = '1,4';
@@ -1267,9 +1218,7 @@ module.exports = {
       },
 
       checkSheet(wb) {
-        const wsSquare = wb.getWorksheet(
-          'splice-col-replace-name-square'
-        );
+        const wsSquare = wb.getWorksheet('splice-col-replace-name-square');
         expect(wsSquare).to.not.be.undefined();
 
         expect(wsSquare.getRow(1).values).to.deep.equal([
@@ -1311,9 +1260,7 @@ module.exports = {
           });
         });
 
-        const wsSingles = wb.getWorksheet(
-          'splice-col-replace-name-singles'
-        );
+        const wsSingles = wb.getWorksheet('splice-col-replace-name-singles');
         expect(wsSingles).to.not.be.undefined();
 
         expect(wsSingles.getRow(1).values).to.deep.equal([

@@ -44,5 +44,16 @@
     "B5": { "type": "list", "allowBlank": true, "showInputMessage": true, "showErrorMessage": true, "formulae": ["\"value 1, value 2, value 3\""]},
     "B7": { "type": "whole", "allowBlank": true, "showInputMessage": true, "showErrorMessage": true, "operator": "between", "formulae": ["1", "10"]}
   },
-  "media": []
+  "media": [],
+  "tables": [],
+  "conditionalFormattings": [{
+    "ref": "A1:E7",
+    "rules": [
+      {
+        "type": "expression",
+        "formulae": ["MOD(ROW()+COLUMN(),2)=0"],
+        "style": {"fill": {"type": "pattern", "pattern": "solid", "bgColor": {"argb": "FF00FF00"}}}
+      }
+    ]
+  }]
 }

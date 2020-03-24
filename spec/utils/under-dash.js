@@ -1,7 +1,3 @@
-'use strict';
-
-const verquire = require('./verquire');
-
 const _ = Object.assign(
   {
     get: function get(obj, path, dflt) {
@@ -24,10 +20,14 @@ const _ = Object.assign(
         preserveUndefined = true;
       }
       let clone;
+      if (obj === null) {
+        return null;
+      }
+      if (obj instanceof Date) {
+        return obj;
+      }
       if (obj instanceof Array) {
         clone = [];
-      } else if (obj instanceof Date) {
-        return obj;
       } else if (typeof obj === 'object') {
         clone = {};
       } else {

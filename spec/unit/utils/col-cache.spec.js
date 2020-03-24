@@ -1,8 +1,4 @@
-'use strict';
-
-const { expect } = require('chai');
-
-const colCache = require('../../../lib/utils/col-cache');
+const colCache = verquire('utils/col-cache');
 
 describe('colCache', () => {
   it('caches values', () => {
